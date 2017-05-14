@@ -62,6 +62,45 @@ unsigned char uncodedLookahead[MAX_CODED];
 *                                FUNCTIONS
 ***************************************************************************/
 
+/* TODO combine length functions */
+unsigned int lengthCode(unsigned int length)
+{
+  if(length < 4) {
+    return length - 2;
+  }
+  else if(length < 8) {
+    return 0x8 | length - 4;
+  }
+  else if(length < 16) {
+    return 0x60 | length - 8;
+  }
+  else if(length < 32) {
+    return 0xE0 | length - 16;
+  }
+  else {
+    return 0xF00 | length - 32;
+  }
+}
+
+unsigned int lengthCodeLength(unsigned int length)
+{
+  if(length < 4) {
+    return 2;
+  }
+  else if(length < 8) {
+    return 4;
+  }
+  else if(length < 16) {
+    return 6;
+  }
+  else if(length < 32) {
+    return 8;
+  }
+  else {
+    return 12;
+  }
+}
+
 /****************************************************************************
 *   Function   : EncodeLZSS
 *   Description: This function will read an input file and write an output
@@ -111,7 +150,7 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
     * use the same values.  If common characters are used, there's an
     * increased chance of matching to the earlier strings.
     ************************************************************************/
-    memset(slidingWindow, ' ', WINDOW_SIZE * sizeof(unsigned char));
+    memset(slidingWindow, 0, WINDOW_SIZE * sizeof(unsigned char));
 
     /************************************************************************
     * Copy MAX_CODED bytes from the input file into the uncoded lookahead
@@ -137,7 +176,7 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
 
     matchData = FindMatch(windowHead, uncodedHead);
 
-    /* now encoded the rest of the file until an EOF is read */
+    /* now encode the rest of the file until an EOF is read */
     while (len > 0)
     {
         if (matchData.length > len)
@@ -156,16 +195,15 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
         }
         else
         {
-            unsigned int adjustedLen;
-
-            /* adjust the length of the match so minimun encoded len is 0*/
-            adjustedLen = matchData.length - (MAX_UNCODED + 1);
+          unsigned int length_code = lengthCode(matchData.length);
+          unsigned int length_bits = lengthCodeLength(matchData.length);
 
             /* match length > MAX_UNCODED.  Encode as offset and length. */
             BitFilePutBit(ENCODED, bfpOut);
+            BitFilePutBitsNum(bfpOut, &length_code, length_bits,
+                              sizeof(unsigned int));
+            /* ALDC calls this displacement - hope it means the same thing */
             BitFilePutBitsNum(bfpOut, &matchData.offset, OFFSET_BITS,
-                sizeof(unsigned int));
-            BitFilePutBitsNum(bfpOut, &adjustedLen, LENGTH_BITS,
                 sizeof(unsigned int));
         }
 
@@ -197,6 +235,14 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
 
         /* find match for the remaining characters */
         matchData = FindMatch(windowHead, uncodedHead);
+    }
+
+    {
+      /* ALDC end marker */
+      unsigned int end_marker = 0xFFF;
+      /* ALDC end marker */
+      BitFilePutBitsNum(bfpOut, &end_marker, 12,
+                        sizeof(unsigned int));
     }
 
     /* we've encoded everything, free bitfile structure */
