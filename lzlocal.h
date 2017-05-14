@@ -44,7 +44,6 @@
 
 /* #define OFFSET_BITS     12 */
 #define OFFSET_BITS     9
-/* #define LENGTH_BITS     4 */
 #define LENGTH_BITS     9
 
 #if (((1 << (OFFSET_BITS + LENGTH_BITS)) - 1) > UINT_MAX)
@@ -56,7 +55,6 @@
 
 /* maximum match length not encoded and maximum length encoded (4 bits) */
 #define MAX_UNCODED     2
-/* #define MAX_CODED       ((1 << LENGTH_BITS) + MAX_UNCODED) */
 #define MAX_CODED       271
 
 #define ENCODED     1       /* encoded string */

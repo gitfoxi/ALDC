@@ -62,44 +62,64 @@ unsigned char uncodedLookahead[MAX_CODED];
 *                                FUNCTIONS
 ***************************************************************************/
 
-/* TODO combine length functions */
-unsigned int lengthCode(unsigned int length)
+typedef struct
+{
+  unsigned int code;
+  unsigned int bits;
+}length_code_t;
+
+length_code_t lengthCode(unsigned int length)
 {
   if(length < 4) {
-    return length - 2;
+    length_code_t r;
+    r.code = length - 2;
+    r.bits   = 2;
+    return r;
   }
   else if(length < 8) {
-    return 0x8 | length - 4;
+    length_code_t r;
+    r.code = 0x8 | length - 4;
+    r.bits   = 4;
+    return r;
   }
   else if(length < 16) {
-    return 0x60 | length - 8;
+    length_code_t r;
+    r.code =0x60 | length - 8;
+    r.bits   = 6;
+    return r;
   }
   else if(length < 32) {
-    return 0xE0 | length - 16;
+    length_code_t r;
+    r.code = 0xE0 | length - 16;
+    r.bits   = 8;
+    return r;
   }
   else {
-    return 0xF00 | length - 32;
+    length_code_t r;
+    r.code   = 0xF00 | length - 32;
+    r.bits   = 12;
+    return r;
   }
 }
 
-unsigned int lengthCodeLength(unsigned int length)
-{
-  if(length < 4) {
-    return 2;
-  }
-  else if(length < 8) {
-    return 4;
-  }
-  else if(length < 16) {
-    return 6;
-  }
-  else if(length < 32) {
-    return 8;
-  }
-  else {
-    return 12;
-  }
-}
+/* unsigned int lengthCodeLength(unsigned int length) */
+/* { */
+/*   if(length < 4) { */
+/*     return 2; */
+/*   } */
+/*   else if(length < 8) { */
+/*     return 4; */
+/*   } */
+/*   else if(length < 16) { */
+/*     return 6; */
+/*   } */
+/*   else if(length < 32) { */
+/*     return 8; */
+/*   } */
+/*   else { */
+/*     return 12; */
+/*   } */
+/* } */
 
 /****************************************************************************
 *   Function   : EncodeLZSS
@@ -195,12 +215,11 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
         }
         else
         {
-          unsigned int length_code = lengthCode(matchData.length);
-          unsigned int length_bits = lengthCodeLength(matchData.length);
+          length_code_t length_code = lengthCode(matchData.length);
 
             /* match length > MAX_UNCODED.  Encode as offset and length. */
             BitFilePutBit(ENCODED, bfpOut);
-            BitFilePutBitsNum(bfpOut, &length_code, length_bits,
+            BitFilePutBitsNum(bfpOut, &( length_code.code ), length_code.bits,
                               sizeof(unsigned int));
             /* ALDC calls this displacement - hope it means the same thing */
             BitFilePutBitsNum(bfpOut, &matchData.offset, OFFSET_BITS,
