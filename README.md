@@ -7,8 +7,11 @@ Adaptive Lossless Data Compression
 aka: ALDC-0, IBM-LZ1, ECMA-222, QIC-154A, ISO/IEC 15200:1996
 
 https://www.ecma-international.org/publications/files/ECMA-ST/Ecma-222.pdf
+
 http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.133.99&rep=rep1&type=pdf
+
 http://www.qic.org/html/standards/15x.x/qic154a.pdf
+
 https://www.hotchips.org/wp-content/uploads/hc_archives/hc07/3_Tue/HC7.S5/HC7.5.3.pdf
 
 Based on Michael Dipperstein's LZSS which is a great place to start -- Big thanks Michael! -- given that ALDC itself is based on LZSS.
@@ -30,6 +33,7 @@ If you need ALDC-1 or ALDC-2, it should be a simple matter of changing OFFSET_BI
 Thanks also to
 
 https://github.com/NimbusKit/memorymapping
+
 http://piumarta.com/software/memstream/
 
 
