@@ -1,25 +1,25 @@
 /***************************************************************************
-*                     Sample Program Using LZSS Library
+*                     Sample Program Using Aldc Library
 *
 *   File    : sample.c
-*   Purpose : Demonstrate usage of LZSS library
+*   Purpose : Demonstrate usage of Aldc library
 *   Author  : Michael Dipperstein
 *   Date    : February 21, 2004
 *
 ****************************************************************************
 *
-* SAMPLE: Sample usage of LZSS Library
+* SAMPLE: Sample usage of Aldc Library
 * Copyright (C) 2004, 2006, 2007, 2014 by
 * Michael Dipperstein (mdipper@alumni.engr.ucsb.edu)
 *
-* This file is part of the lzss library.
+* This file is part of the Aldc library.
 *
-* The lzss library is free software; you can redistribute it and/or
+* The Aldc library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public License as
 * published by the Free Software Foundation; either version 3 of the
 * License, or (at your option) any later version.
 *
-* The lzss library is distributed in the hope that it will be useful, but
+* The Aldc library is distributed in the hope that it will be useful, but
 * WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
 * General Public License for more details.
@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lzss.h"
+#include "aldc.h"
 #include "optlist.h"
 
 /***************************************************************************
@@ -67,8 +67,8 @@ typedef enum
 *   Function   : main
 *   Description: This is the main function for this program, it validates
 *                the command line input and, if valid, it will either
-*                encode a file using the LZSS algorithm or decode a
-*                file encoded with the LZSS algorithm.
+*                encode a file using the Aldc algorithm or decode a
+*                file encoded with the Aldc algorithm.
 *   Parameters : argc - number of parameters
 *                argv - parameter list
 *   Effects    : Encodes/Decodes input file
@@ -201,11 +201,11 @@ int main(int argc, char *argv[])
     /* we have valid parameters encode or decode */
     if (mode == ENCODE)
     {
-        EncodeLZSS(fpIn, fpOut);
+        EncodeAldc(fpIn, fpOut);
     }
     else
     {
-        DecodeLZSS(fpIn, fpOut);
+        DecodeAldc(fpIn, fpOut);
     }
 
     /* remember to close files */

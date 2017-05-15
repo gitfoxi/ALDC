@@ -1,19 +1,21 @@
 /***************************************************************************
-*                 Lempel, Ziv, Storer, and Szymanski Encoding
+*                 ALDC encoding and decoding
 *
-*   File    : lzss.c
-*   Purpose : Use lzss coding (Storer and Szymanski's modified LZ77) to
-*             compress lzss data files.
+*   File    : aldc.c
+*   Purpose : Use Aldc compress and decompress data files.
 *   Author  : Michael Dipperstein
 *   Date    : November 28, 2014
+*   Ported to ALDC: Michael Fox
+*   Date    : May 25, 2017
 *
 ****************************************************************************
 *
-* LZss: An ANSI C LZSS Encoding/Decoding Routines
+* Aldc: Aldc Encoding/Decoding Routines
 * Copyright (C) 2003 - 2007, 2014 by
 * Michael Dipperstein (mdipper@alumni.engr.ucsb.edu)
+* Copyright (C) 2017 by Michael Fox
 *
-* This file is part of the lzss library.
+* This file is part of the ALDC library.
 *
 * The lzss library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public License as
@@ -38,6 +40,11 @@
 #include <errno.h>
 #include "lzlocal.h"
 #include "bitfile.h"
+
+#if __APPLE__ || __FreeBSD__
+#include "memstream.h"
+#include "fmemopen.h"
+#endif
 
 /***************************************************************************
 *                            TYPE DEFINITIONS
@@ -103,11 +110,9 @@ length_code_t lengthCode(unsigned int length)
 }
 
 /****************************************************************************
-*   Function   : EncodeLZSS
+*   Function   : EncodeAldc
 *   Description: This function will read an input file and write an output
-*                file encoded according to the traditional LZSS algorithm.
-*                This algorithm encodes strings as 16 bits (a 12 bit offset
-*                + a 4 bit length).
+*                file encoded according to the Aldc algorithm.
 *   Parameters : fpIn - pointer to the open binary file to encode
 *                fpOut - pointer to the open binary file to write encoded
 *                       output
@@ -116,7 +121,7 @@ length_code_t lengthCode(unsigned int length)
 *   Returned   : 0 for success, -1 for failure.  errno will be set in the
 *                event of a failure.
 ****************************************************************************/
-int EncodeLZSS(FILE *fpIn, FILE *fpOut)
+int EncodeAldc(FILE *fpIn, FILE *fpOut)
 {
     bit_file_t *bfpOut;
     encoded_string_t matchData;
@@ -147,7 +152,7 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
     uncodedHead = 0;
 
     /************************************************************************
-    * Fill the sliding window buffer with some known vales.  DecodeLZSS must
+    * Fill the sliding window buffer with some known vales.  DecodeAldc must
     * use the same values.  If common characters are used, there's an
     * increased chance of matching to the earlier strings.
     ************************************************************************/
@@ -253,8 +258,8 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
 }
 
 /****************************************************************************
-*   Function   : DecodeLZSSByFile
-*   Description: This function will read an LZSS encoded input file and
+*   Function   : DecodeAldc
+*   Description: This function will read an ALDC encoded input file and
 *                write an output file.  This algorithm encodes strings as 16
 *                bits (a 12 bit offset + a 4 bit length).
 *   Parameters : fpIn - pointer to the open binary file to decode
@@ -265,7 +270,7 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
 *   Returned   : 0 for success, -1 for failure.  errno will be set in the
 *                event of a failure.
 ****************************************************************************/
-int DecodeLZSS(FILE *fpIn, FILE *fpOut)
+int DecodeAldc(FILE *fpIn, FILE *fpOut)
 {
     bit_file_t *bfpIn;
     int c;
@@ -289,7 +294,7 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
     }
 
     /************************************************************************
-    * Fill the sliding window buffer with some known vales.  EncodeLZSS must
+    * Fill the sliding window buffer with some known vales.  EncodeAldc must
     * use the same values.  If common characters are used, there's an
     * increased chance of matching to the earlier strings.
     ************************************************************************/
@@ -399,4 +404,39 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
     BitFileToFILE(bfpIn);
 
     return 0;
+}
+
+#include <stdlib.h>
+
+/* Caller frees *sOut */
+int EncodeAldcString(char *sIn, size_t inLen, char **sOut, size_t *outLen) {
+  FILE *fIn, *fOut;
+  char *memOut;
+  size_t memOutSz;
+
+  fIn = fmemopen(sIn, inLen, "r");
+  fOut = open_memstream(&memOut, &memOutSz);
+  EncodeAldc(fIn, fOut);
+  fclose(fIn);
+  fclose(fOut);
+  *outLen = memOutSz;
+  *sOut = memOut;
+  /* TODO check errors */
+  return 0;
+}
+/* Caller frees *sOut */
+int DecodeAldcString(char *sIn, size_t inLen, char **sOut, size_t *outLen) {
+  FILE *fIn, *fOut;
+  char *memOut;
+  size_t memOutSz;
+
+  fIn = fmemopen(sIn, inLen, "r");
+  fOut = open_memstream(&memOut, &memOutSz);
+  DecodeAldc(fIn, fOut);
+  fclose(fIn);
+  fclose(fOut);
+  *outLen = memOutSz;
+  *sOut = memOut;
+  /* TODO check errors */
+  return 0;
 }

@@ -1,12 +1,14 @@
 /***************************************************************************
-*          Lempel, Ziv, Storer, and Szymanski Encoding and Decoding
+*          ALDC Encoding and Decoding
 *
-*   File    : lzss.h
-*   Purpose : Header for LZSS encode and decode routines.  Contains the
+*   File    : aldc.h
+*   Purpose : Header for ALDC encode and decode routines.  Contains the
 *             prototypes to be used by programs linking to the LZSS
 *             library.
 *   Author  : Michael Dipperstein
 *   Date    : February 21, 2004
+*   Ported to ALDC : Michael Fox
+*   Date    : May 25, 2017
 *
 ****************************************************************************
 *
@@ -16,12 +18,12 @@
 *
 * This file is part of the lzss library.
 *
-* The lzss library is free software; you can redistribute it and/or
+* The aldc library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public License as
 * published by the Free Software Foundation; either version 3 of the
 * License, or (at your option) any later version.
 *
-* The lzss library is distributed in the hope that it will be useful, but
+* The aldc library is distributed in the hope that it will be useful, but
 * WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
 * General Public License for more details.
@@ -30,15 +32,15 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 ***************************************************************************/
-#ifndef _LZSS_H
-#define _LZSS_H
+#ifndef _ALDC_H
+#define _ALDC_H
 
 /***************************************************************************
 *                               PROTOTYPES
 ***************************************************************************/
 
 /***************************************************************************
-* LZSS encoding and decoding prototypes for functions with file pointer
+* ALDC encoding and decoding prototypes for functions with file pointer
 * parameters.  Provide these functions with a pointer to the open binary
 * file to be encoded/decoded (fpIn) and pointer to the open binary target
 * file (fpOut).  It is the job of the function caller to open the files
@@ -48,7 +50,10 @@
 * These functions return 0 for success and -1 for failure.  errno will be
 * set in the event of a failure. 
 ***************************************************************************/
-int EncodeLZSS(FILE *fpIn, FILE *fpOut);
-int DecodeLZSS(FILE *fpIn, FILE *fpOut);
+int EncodeAldc(FILE *fpIn, FILE *fpOut);
+int DecodeAldc(FILE *fpIn, FILE *fpOut);
 
-#endif      /* ndef _LZSS_H */
+int EncodeAldcString(char *sIn, size_t inLen, char **sOut, size_t *outLen);
+int DecodeAldcString(char *sIn, size_t inLen, char **sOut, size_t *outLen);
+
+#endif      /* ndef _ALDC_H */

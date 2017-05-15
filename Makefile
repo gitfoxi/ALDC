@@ -1,13 +1,15 @@
 ############################################################################
-# Makefile for lzss encode/decode library and sample program
+# Makefile for aldc encode/decode library and sample program
 ############################################################################
 CC = gcc
 LD = gcc
-CFLAGS = -I. -O3 -Wall -Wextra -pedantic -ansi -c
-LDFLAGS = -O3 -o
+CFLAGS = -I. -O0 -Wall -Wextra -pedantic -ansi -c -g
+LDFLAGS = -O0 -o
+# -O3
+OS := $(shell uname)
 
 # libraries
-LIBS = -L. -llzss -loptlist
+LIBS = -L. -laldc -loptlist
 
 # Treat NT and non-NT windows the same
 ifeq ($(OS),Windows_NT)
@@ -27,6 +29,13 @@ else	#assume Linux/Unix
 	DEL = rm -f
 endif
 
+ifeq ($(OS),Darwin)
+  MEMSTREAM_O = memstream.o
+  FMEMOPEN_O = fmemopen.o
+else
+  MEMSTREAM_O =
+endif
+
 # define the method to be used for searching for matches (choose one)
 # brute force
 FMOBJ = brute.o
@@ -43,21 +52,27 @@ FMOBJ = brute.o
 # binary tree
 # FMOBJ = tree.o
 
-LZOBJS = $(FMOBJ) lzss.o
+LZOBJS = $(FMOBJ) aldc.o
 
-all:		sample$(EXE) liblzss.a liboptlist.a
+all:		test sample$(EXE) libaldc.a liboptlist.a
 
-sample$(EXE):	sample.o liblzss.a liboptlist.a
-		$(LD) $< $(LIBS) $(LDFLAGS) $@
+test: libaldc.a test.o liboptlist.a
+		$(LD) test.o $< $(LIBS) $(LDFLAGS) $@
 
-sample.o:	sample.c lzss.h optlist.h
+test.o:	test.c aldc.h
 		$(CC) $(CFLAGS) $<
 
-liblzss.a:	$(LZOBJS) bitfile.o
-		ar crv liblzss.a $(LZOBJS) bitfile.o
-		ranlib liblzss.a
+sample$(EXE):	sample.o libaldc.a liboptlist.a
+		$(LD) $< $(LIBS) $(LDFLAGS) $@
 
-lzss.o:	lzss.c lzlocal.h bitfile.h
+sample.o:	sample.c aldc.h optlist.h
+		$(CC) $(CFLAGS) $<
+
+libaldc.a:	$(LZOBJS) bitfile.o $(MEMSTREAM_O) $(FMEMOPEN_O)
+		ar crv libaldc.a $(LZOBJS) bitfile.o $(MEMSTREAM_O) $(FMEMOPEN_O)
+		ranlib libaldc.a
+
+aldc.o:	aldc.c lzlocal.h bitfile.h
 		$(CC) $(CFLAGS) $<
 
 brute.o:	brute.c lzlocal.h
@@ -85,7 +100,15 @@ liboptlist.a:	optlist.o
 optlist.o:	optlist.c optlist.h
 		$(CC) $(CFLAGS) $<
 
+memstream.o: memstream.c memstream.h
+		$(CC) $(CFLAGS) $<
+
 clean:
 		$(DEL) *.o
 		$(DEL) *.a
 		$(DEL) sample$(EXE)
+
+.PHONY: printvars
+
+printvars:
+				@$(foreach V,$(sort $(.VARIABLES)), $(if $(filter-out environment% default automatic, $(origin $V)),$(warning $V=$($V) ($(value $V)))))
