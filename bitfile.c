@@ -493,6 +493,7 @@ int BitFileGetChar(bit_file_t *stream)
 int BitFilePutChar(const int c, bit_file_t *stream)
 {
     unsigned char tmp;
+    fprintf(stderr,"PutChar: 0x%x\n", c);
 
     if (stream == NULL)
     {
@@ -575,6 +576,7 @@ int BitFileGetBit(bit_file_t *stream)
 int BitFilePutBit(const int c, bit_file_t *stream)
 {
     int returnValue = c;
+    fprintf(stderr,"PutBit: %d\n", c);
 
     if (stream == NULL)
     {

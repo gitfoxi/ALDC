@@ -4,7 +4,7 @@ ALDC
 
 Adaptive Lossless Data Compression
 
-(ALDC-0, IBM-LZ1)
+aka: ALDC-0, IBM-LZ1, ECMA-222, QIC-154A, ISO/IEC 15200:1996
 
 https://www.ecma-international.org/publications/files/ECMA-ST/Ecma-222.pdf
 http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.133.99&rep=rep1&type=pdf
@@ -27,8 +27,22 @@ I might get around to trying that.
 
 If you need ALDC-1 or ALDC-2, it should be a simple matter of changing OFFSET_BITS to 10 or 11. But I haven't tried it. 
 
+
+Build
+------
+
+    make
+
+
+Example
+---------
+
+    cat /usr/share/dict/words | ./sample -c | ./sample -d > words.roundtrip
+
+
 License
 ---------
-Copyright Michael Fox 2017
+Copyright (C) 2004-2014 by Michael Dipperstein
+Copyright (C) Michael Fox 2017
 
 GPL-3

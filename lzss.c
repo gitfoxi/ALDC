@@ -185,12 +185,14 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
             /* garbage beyond last data happened to extend match length */
             matchData.length = len;
         }
+        fprintf(stderr, "matchData: offset %d length %d\n", matchData.offset, matchData.length);
 
         if (matchData.length <= MAX_UNCODED)
         {
             /* not long enough match.  write uncoded flag and character */
             BitFilePutBit(UNCODED, bfpOut);
             BitFilePutChar(uncodedLookahead[uncodedHead], bfpOut);
+            fprintf(stderr,"Put literal: %c\n", uncodedLookahead[uncodedHead]);
 
             matchData.length = 1;   /* set to 1 for 1 byte uncoded */
         }
@@ -200,11 +202,21 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
 
             /* match length > MAX_UNCODED.  Encode as offset and length. */
             BitFilePutBit(ENCODED, bfpOut);
-            BitFilePutBitsNum(bfpOut, &( length_code.code ), length_code.bits,
-                              sizeof(unsigned int));
+            if (length_code.bits > 8) {
+              BitFilePutBitsNum(bfpOut, &( length_code.code) - 1, length_code.bits - 8,
+                                sizeof(unsigned int));
+              BitFilePutBitsNum(bfpOut, &( length_code.code ),  8,
+                                sizeof(unsigned int));
+            } else
+              {
+                BitFilePutBitsNum(bfpOut, &( length_code.code ), length_code.bits,
+                                  sizeof(unsigned int));
+              }
+            fprintf(stderr,"Put length: 0x%x, %d bits\n", length_code.code, length_code.bits);
             /* ALDC calls this displacement - hope it means the same thing */
             BitFilePutBitsNum(bfpOut, &matchData.offset, OFFSET_BITS,
                 sizeof(unsigned int));
+            fprintf(stderr,"Put offset: %d\n", matchData.offset);
         }
 
         /********************************************************************
@@ -332,7 +344,7 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
                   {
                     goto BREAK_OUTER;
                   }
-                /* fprintf(stderr, "bit: %d\n", bit); */
+                fprintf(stderr, "bit: %d\n", bit);
                 if (bit == 1) { prefix++; }
                 else { goto BREAK_INNER; }
               }
@@ -350,7 +362,7 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
                 break;
               }
 
-            /* fprintf(stderr, "READ code.length: %d\n", code.length); */
+            fprintf(stderr, "READ code.length: %d\n", code.length);
             if (code.length == 0xFF) { break ; } /* end code 0xFFF */
 
             if (prefix == 0) { code.length += 2; }
@@ -365,10 +377,10 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
                 break;
             }
 
-            /* fprintf(stderr, "prefix length_bits code.length code.offset slidingWindow\n"); */
-            /* fprintf(stderr, "%x %x %x %x %s\n" */
-            /*         , prefix, length_bits, code.length, code.offset, slidingWindow */
-            /*         ); */
+            fprintf(stderr, "prefix length_bits code.length code.offset slidingWindow\n");
+            fprintf(stderr, "%d %d %d %d %s\n"
+                    , prefix, length_bits, code.length, code.offset, slidingWindow
+                    );
 
             /****************************************************************
             * Write out decoded string to file and lookahead.  It would be
