@@ -27,6 +27,11 @@ I might get around to trying that.
 
 If you need ALDC-1 or ALDC-2, it should be a simple matter of changing OFFSET_BITS to 10 or 11. But I haven't tried it. 
 
+Thanks also to
+
+https://github.com/NimbusKit/memorymapping
+http://piumarta.com/software/memstream/
+
 
 Build
 ------

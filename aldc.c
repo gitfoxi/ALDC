@@ -219,8 +219,12 @@ int EncodeAldc(FILE *fpIn, FILE *fpOut)
         * sliding window with new bytes from the input file.
         ********************************************************************/
         i = 0;
-        while ((i < matchData.length) && ((c = getc(fpIn)) != EOF))
+        char buf[2 * WINDOW_SIZE];
+        size_t bytes_read;
+        bytes_read = fread(buf, 1, matchData.length, fpIn);
+        while (i < bytes_read)
         {
+          char c = buf[i];
             /* add old byte into sliding window and new into lookahead */
             ReplaceChar(windowHead, uncodedLookahead[uncodedHead]);
             uncodedLookahead[uncodedHead] = c;

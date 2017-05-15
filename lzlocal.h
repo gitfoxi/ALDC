@@ -53,7 +53,7 @@
 #define WINDOW_SIZE     (1 << OFFSET_BITS)
 
 /* maximum match length not encoded and maximum length encoded (4 bits) */
-#define MAX_UNCODED     2
+#define MAX_UNCODED     1
 #define MAX_CODED       271
 
 #define ENCODED     1       /* encoded string */
