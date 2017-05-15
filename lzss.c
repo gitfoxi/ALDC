@@ -84,7 +84,7 @@ length_code_t lengthCode(unsigned int length)
   }
   else if(length < 16) {
     length_code_t r;
-    r.code =0x60 | length - 8;
+    r.code =0x30 | length - 8;
     r.bits   = 6;
     return r;
   }
@@ -101,25 +101,6 @@ length_code_t lengthCode(unsigned int length)
     return r;
   }
 }
-
-/* unsigned int lengthCodeLength(unsigned int length) */
-/* { */
-/*   if(length < 4) { */
-/*     return 2; */
-/*   } */
-/*   else if(length < 8) { */
-/*     return 4; */
-/*   } */
-/*   else if(length < 16) { */
-/*     return 6; */
-/*   } */
-/*   else if(length < 32) { */
-/*     return 8; */
-/*   } */
-/*   else { */
-/*     return 12; */
-/*   } */
-/* } */
 
 /****************************************************************************
 *   Function   : EncodeLZSS
@@ -258,9 +239,9 @@ int EncodeLZSS(FILE *fpIn, FILE *fpOut)
 
     {
       /* ALDC end marker */
-      unsigned int end_marker = 0xFFF;
+      unsigned int end_marker = 0x1FFF;
       /* ALDC end marker */
-      BitFilePutBitsNum(bfpOut, &end_marker, 12,
+      BitFilePutBitsNum(bfpOut, &end_marker, 13,
                         sizeof(unsigned int));
     }
 
@@ -315,7 +296,7 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
 
     nextChar = 0;
 
-    while (1)
+ while (1)
     {
         if ((c = BitFileGetBit(bfpIn)) == EOF)
         {
@@ -338,9 +319,45 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
         }
         else
         {
+          unsigned int length_bits = 0;
+          unsigned int prefix = 0;
+          int bit = 0;
             /* offset and length */
             code.offset = 0;
             code.length = 0;
+
+        for(i = 0; i < 4; i++)
+              {
+                if ((bit = BitFileGetBit(bfpIn)) == EOF)
+                  {
+                    goto BREAK_OUTER;
+                  }
+                /* fprintf(stderr, "bit: %d\n", bit); */
+                if (bit == 1) { prefix++; }
+                else { goto BREAK_INNER; }
+              }
+        BREAK_INNER:
+            if (prefix == 0) { length_bits = 1; }
+            else if (prefix == 1) { length_bits = 2; }
+            else if (prefix == 2) { length_bits = 3; }
+            else if (prefix == 3) { length_bits = 4; }
+            else /* if (prefix == 4) */ { length_bits = 8; }
+
+
+            if ((BitFileGetBitsNum(bfpIn, &code.length, length_bits,
+                                   sizeof(unsigned int))) == EOF)
+              {
+                break;
+              }
+
+            /* fprintf(stderr, "READ code.length: %d\n", code.length); */
+            if (code.length == 0xFF) { break ; } /* end code 0xFFF */
+
+            if (prefix == 0) { code.length += 2; }
+            else if (prefix == 1) { code.length += 4; }
+            else if (prefix == 2) { code.length += 8; }
+            else if (prefix == 3) { code.length += 16; }
+            else if (prefix == 4) { code.length += 32; }
 
             if ((BitFileGetBitsNum(bfpIn, &code.offset, OFFSET_BITS,
                 sizeof(unsigned int))) == EOF)
@@ -348,13 +365,10 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
                 break;
             }
 
-            if ((BitFileGetBitsNum(bfpIn, &code.length, LENGTH_BITS,
-                sizeof(unsigned int))) == EOF)
-            {
-                break;
-            }
-
-            code.length += MAX_UNCODED + 1;
+            /* fprintf(stderr, "prefix length_bits code.length code.offset slidingWindow\n"); */
+            /* fprintf(stderr, "%x %x %x %x %s\n" */
+            /*         , prefix, length_bits, code.length, code.offset, slidingWindow */
+            /*         ); */
 
             /****************************************************************
             * Write out decoded string to file and lookahead.  It would be
@@ -379,7 +393,7 @@ int DecodeLZSS(FILE *fpIn, FILE *fpOut)
             nextChar = Wrap((nextChar + code.length), WINDOW_SIZE);
         }
     }
-
+ BREAK_OUTER:
     /* we've decoded everything, free bitfile structure */
     BitFileToFILE(bfpIn);
 

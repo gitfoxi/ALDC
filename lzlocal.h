@@ -42,7 +42,6 @@
 *                                CONSTANTS
 ***************************************************************************/
 
-/* #define OFFSET_BITS     12 */
 #define OFFSET_BITS     9
 #define LENGTH_BITS     9
 
