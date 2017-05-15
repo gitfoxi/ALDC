@@ -83,8 +83,8 @@ int BitFileGetBit(bit_file_t *stream);
 int BitFilePutBit(const int c, bit_file_t *stream);
 
 /* get/put number of bits (most significant bit to least significat bit) */
-int BitFileGetBits(bit_file_t *stream, void *bits, const unsigned int count);
-int BitFilePutBits(bit_file_t *stream, void *bits, const unsigned int count);
+int BitFileGetBits(bit_file_t *stream, unsigned int *bits, const unsigned int count);
+int BitFilePutBits(bit_file_t *stream, unsigned int bits, const unsigned int count);
 
 /***************************************************************************
 * get/put a number of bits from numerical types (short, int, long, ...)

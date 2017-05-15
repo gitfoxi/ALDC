@@ -1,0 +1,3 @@
+Bug with 0-byte strings
+Hotspots seem to be FindMatch, ReplaceChar
+In decode, putc is hot

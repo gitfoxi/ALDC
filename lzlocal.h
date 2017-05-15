@@ -42,8 +42,8 @@
 *                                CONSTANTS
 ***************************************************************************/
 
-#define OFFSET_BITS     12
-#define LENGTH_BITS     4
+#define OFFSET_BITS     9
+#define LENGTH_BITS     9
 
 #if (((1 << (OFFSET_BITS + LENGTH_BITS)) - 1) > UINT_MAX)
 #error "Size of encoded data must not exceed the size of an unsigned int"
@@ -53,11 +53,11 @@
 #define WINDOW_SIZE     (1 << OFFSET_BITS)
 
 /* maximum match length not encoded and maximum length encoded (4 bits) */
-#define MAX_UNCODED     2
-#define MAX_CODED       ((1 << LENGTH_BITS) + MAX_UNCODED)
+#define MAX_UNCODED     1
+#define MAX_CODED       271
 
-#define ENCODED     0       /* encoded string */
-#define UNCODED     1       /* unencoded character */
+#define ENCODED     1       /* encoded string */
+#define UNCODED     0       /* unencoded character */
 
 /***************************************************************************
 *                            TYPE DEFINITIONS
