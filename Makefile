@@ -3,7 +3,7 @@
 ############################################################################
 CC = gcc
 LD = gcc
-CFLAGS = -I. -O3 -Wall -Wextra -pedantic -ansi -c -g
+CFLAGS = -I. -O3 -Wall -Wextra -pedantic -ansi -c -march=native
 LDFLAGS = -O3 -o
 # -O3
 OS := $(shell uname)
