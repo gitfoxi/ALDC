@@ -169,7 +169,7 @@ int EncodeAldc(FILE *fpIn, FILE *fpOut)
 
     if (0 == len)
     {
-        return 0;   /* inFile was empty */
+      goto ALDC_END;   /* inFile was empty */
     }
 
     /* Look for matching string in sliding window */
@@ -247,7 +247,7 @@ int EncodeAldc(FILE *fpIn, FILE *fpOut)
         /* find match for the remaining characters */
         matchData = FindMatch(windowHead, uncodedHead);
     }
-
+ ALDC_END:
     {
       /* ALDC end marker */
       unsigned int end_marker = 0x1FFF;
