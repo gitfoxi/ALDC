@@ -52,6 +52,7 @@ Example
 License
 ---------
 Copyright (C) 2004-2014 by Michael Dipperstein
+
 Copyright (C) Michael Fox 2017
 
 GPL-3
