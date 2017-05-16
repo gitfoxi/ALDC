@@ -226,6 +226,10 @@ int EncodeAldc(FILE *fpIn, FILE *fpOut)
         {
           char c = buf[i];
             /* add old byte into sliding window and new into lookahead */
+        /* getc optimization may have caused a subtle bug */
+        /* i = 0; */
+        /* while ((i < matchData.length) && ((c = getc(fpIn)) != EOF)) */
+        /*   { */
             ReplaceChar(windowHead, uncodedLookahead[uncodedHead]);
             uncodedLookahead[uncodedHead] = c;
             windowHead = Wrap((windowHead + 1), WINDOW_SIZE);
@@ -390,14 +394,7 @@ int DecodeAldc(FILE *fpIn, FILE *fpOut)
             {
                 c = slidingWindow[Wrap((code.offset + i), WINDOW_SIZE)];
                 putc(c, fpOut);
-                uncodedLookahead[i] = c;
-            }
-
-            /* write out decoded string to sliding window */
-            for (i = 0; i < code.length; i++)
-            {
-                slidingWindow[Wrap((nextChar + i), WINDOW_SIZE)] =
-                    uncodedLookahead[i];
+                slidingWindow[Wrap((nextChar + i), WINDOW_SIZE)] = c;
             }
 
             nextChar = Wrap((nextChar + code.length), WINDOW_SIZE);
