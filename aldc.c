@@ -182,6 +182,7 @@ int EncodeAldc(FILE *fpIn, FILE *fpOut)
 
     matchData = FindMatch(windowHead, uncodedHead);
 
+    int init = 0;
     /* now encode the rest of the file until an EOF is read */
     while (len > 0)
     {
@@ -192,8 +193,12 @@ int EncodeAldc(FILE *fpIn, FILE *fpOut)
         }
         /* fprintf(stderr, "matchData: offset %d length %d\n", matchData.offset, matchData.length); */
 
-        if (matchData.length <= MAX_UNCODED)
+        /* XXX Aparently the buffer is not necessarily reset to all 0s so
+           I guess fill it with literals as a work-around */
+        if (init < WINDOW_SIZE || matchData.length <= MAX_UNCODED)
         {
+          init++;
+
             /* not long enough match.  write uncoded flag and character */
             BitFilePutBit(UNCODED, bfpOut);
             BitFilePutChar(uncodedLookahead[uncodedHead], bfpOut);
