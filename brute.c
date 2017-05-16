@@ -84,7 +84,7 @@ encoded_string_t FindMatch(const unsigned int windowHead,
 
     matchData.length = 0;
     matchData.offset = 0;
-    i = 0; /* start at the beginning of the sliding window buffer */
+    i = Wrap((windowHead + 1), WINDOW_SIZE); /* start just past the beginning of the sliding window buffer */
     j = 0;
 
     while (1)
