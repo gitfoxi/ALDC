@@ -426,6 +426,7 @@ int EncodeAldcString(char *sIn, size_t inLen, char **sOut, size_t *outLen) {
   *outLen = memOutSz;
   *sOut = memOut;
   /* TODO check errors */
+  /* TODO free something? */
   return 0;
 }
 /* Caller frees *sOut */
@@ -442,5 +443,6 @@ int DecodeAldcString(char *sIn, size_t inLen, char **sOut, size_t *outLen) {
   *outLen = memOutSz;
   *sOut = memOut;
   /* TODO check errors */
+  /* TODO free something? */
   return 0;
 }
